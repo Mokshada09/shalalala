@@ -1,0 +1,59 @@
+# Step 1: Import necessary libraries
+import numpy as np
+import pandas as pd
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.optimizers import Adam
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.metrics import accuracy_score, confusion_matrix,
+classification_report
+
+# Step 2: Load and preprocess the dataset CHANGE THE PATH AS PER YOUR LOCATION OF DATASET
+dataset = pd.read_csv('C:\\Users\\Mokshada\\Downloads\\archive
+(1)\\mental_health_finaldata_1.csv')
+
+# Identify and handle categorical columns
+categorical_columns = dataset.select_dtypes(include=['object']).columns
+label_encoder = LabelEncoder()
+for column in categorical_columns:
+dataset[column] = label_encoder.fit_transform(dataset[column])
+n_features = 13
+X = dataset.iloc[:, 0:n_features].values # Replace n_features with the number
+of features in your dataset
+y = dataset.iloc[:, -1].values # Assuming the last column is the target
+variable
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
+random_state=42)
+
+# Standardize the features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Step 3: Build the neural network model using Keras
+model = Sequential()
+model.add(Dense(units=128, input_dim=n_features, activation='relu'))
+model.add(Dense(units=64, activation='relu'))
+model.add(Dense(units=1, activation='sigmoid'))
+
+# Step 4: Compile the model
+model.compile(optimizer=Adam(learning_rate=0.001), loss='binary_crossentropy',
+metrics=['accuracy'])
+
+# Step 5: Train the model on the training data
+model.fit(X_train, y_train, epochs=10, batch_size=32, verbose=1)
+
+# Step 6: Evaluate the model on the testing data
+y_pred = model.predict(X_test)
+y_pred = (y_pred > 0.5) # Convert probabilities to binary predictions
+
+# Step 7: Analyze performance metrics
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+classification_rep = classification_report(y_test, y_pred)
+print("Accuracy:", accuracy)
+print("Confusion Matrix:\n", conf_matrix)
+print("Classification Report:\n", classification_rep)
